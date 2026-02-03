@@ -1,7 +1,3 @@
-Here is a concise, technically clear **Markdown README** suitable for a GitHub repository. It avoids marketing language and is explicit about the lack of privacy.
-
----
-
 # Save Text
 
 Save Text is a minimal web utility for transporting plain text across devices.
