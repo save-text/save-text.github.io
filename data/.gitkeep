@@ -1,1 +1,23 @@
-
+# This file ensures the data directory exists in the repository
+# Text files will be stored here as JSON files
+# 
+# Structure:
+# data/
+#   ├── .gitkeep (this file)
+#   ├── stats.json (auto-generated statistics)
+#   ├── {code1}.json
+#   ├── {code2}.json
+#   └── ...
+#
+# Each text file contains:
+# {
+#   "content": "...",
+#   "created": "ISO-8601 timestamp",
+#   "expires": "ISO-8601 timestamp or null",
+#   "protected": false,
+#   "metadata": {
+#     "size": 1234,
+#     "lines": 10,
+#     "words": 100
+#   }
+# }
