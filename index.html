@@ -1,1 +1,278 @@
-a
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Save and share text snippets instantly. Free, fast, and secure.">
+    <title>SaveText - Instant Text Sharing</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+    </div>
+
+    <!-- Security Overlay -->
+    <div id="securityOverlay" class="security-overlay hidden">
+        <div class="security-modal">
+            <div class="security-icon">🛡️</div>
+            <h3>Security Check</h3>
+            <p>Please complete the verification below</p>
+            <div id="captchaContainer" class="captcha-container"></div>
+            <button id="verifyCaptcha" class="btn btn-primary">Verify</button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loader">
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <span class="loader-text">Saving...</span>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h2>Text Saved Successfully!</h2>
+                <p>Your text is now available at:</p>
+            </div>
+            <div class="modal-body">
+                <div class="link-container">
+                    <input type="text" id="generatedLink" readonly class="generated-link">
+                    <button id="copyLinkBtn" class="btn btn-icon" title="Copy Link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="qr-container">
+                    <canvas id="qrCode"></canvas>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="openLinkBtn" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    Open Link
+                </button>
+                <button id="closeModal" class="btn btn-secondary">Create Another</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </div>
+                <span class="logo-text">SaveText</span>
+            </div>
+            <nav class="nav">
+                <button id="themeToggle" class="btn btn-icon" title="Toggle Theme">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
+                <a href="https://github.com/save-text/save-text.github.io" target="_blank" class="btn btn-icon" title="GitHub">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="hero">
+                <h1 class="title">
+                    <span class="title-gradient">Save & Share</span>
+                    <span>Text Instantly</span>
+                </h1>
+                <p class="subtitle">Paste your text, get a unique link. Simple, fast, and secure.</p>
+            </div>
+
+            <div class="editor-container">
+                <!-- Text Editor -->
+                <div class="editor-wrapper">
+                    <div class="editor-header">
+                        <div class="editor-tabs">
+                            <button class="tab active" data-tab="text">Plain Text</button>
+                            <button class="tab" data-tab="markdown">Markdown</button>
+                            <button class="tab" data-tab="code">Code</button>
+                        </div>
+                        <div class="editor-info">
+                            <span id="charCount">0</span> / 25,600 characters
+                            <span class="separator">•</span>
+                            <span id="sizeCount">0 KB</span> / 25 KB
+                        </div>
+                    </div>
+                    <div class="editor-body">
+                        <textarea 
+                            id="textInput" 
+                            class="editor-textarea" 
+                            placeholder="Paste or type your text here..."
+                            spellcheck="false"
+                            maxlength="25600"
+                        ></textarea>
+                        <div class="editor-line-numbers" id="lineNumbers"></div>
+                    </div>
+                    <div class="editor-footer">
+                        <div class="editor-actions">
+                            <button id="clearBtn" class="btn btn-ghost" title="Clear">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                Clear
+                            </button>
+                            <button id="pasteBtn" class="btn btn-ghost" title="Paste from Clipboard">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                </svg>
+                                Paste
+                            </button>
+                        </div>
+                        <div class="size-bar">
+                            <div class="size-bar-fill" id="sizeBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Options Panel -->
+                <div class="options-panel">
+                    <div class="option-group">
+                        <label class="option-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            Custom URL Code
+                        </label>
+                        <div class="custom-code-input">
+                            <span class="code-prefix">save-text.github.io/</span>
+                            <input 
+                                type="text" 
+                                id="customCode" 
+                                class="code-input" 
+                                placeholder="random"
+                                pattern="[a-zA-Z0-9_-]+"
+                                minlength="6"
+                                maxlength="12"
+                            >
+                        </div>
+                        <p class="option-hint">6-12 alphanumeric characters. Leave empty for random.</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            Expiration
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="expiration" class="select-input">
+                                <option value="never">Never</option>
+                                <option value="1h">1 Hour</option>
+                                <option value="24h">24 Hours</option>
+                                <option value="7d">7 Days</option>
+                                <option value="30d">30 Days</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label toggle-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Burn After Reading
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="burnAfterRead">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <p class="option-hint">Text will be deleted after first view.</p>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button id="saveBtn" class="btn btn-save" disabled>
+                    <span class="btn-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                        Save Text
+                    </span>
+                    <span class="btn-shine"></span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2024 SaveText. Open source and free forever.</p>
+            <div class="footer-links">
+                <a href="#privacy">Privacy</a>
+                <a href="#terms">Terms</a>
+                <a href="#api">API</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
