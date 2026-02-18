@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveText</title>
+    <script>
+        // Handle direct ID access like /123456
+        const path = window.location.pathname.slice(1);
+        const idMatch = path.match(/^(\d{6})$/);
+        
+        if (idMatch) {
+            // Redirect to view page with ID
+            window.location.href = '/view.html?id=' + idMatch[1];
+        } else {
+            // Redirect to home
+            window.location.href = '/';
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>
