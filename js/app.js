@@ -1,6 +1,6 @@
 // Configuration
 const CONFIG = {
-    API_URL: 'https://your-domain.com/api', // Replace with your backend URL
+    API_URL: 'https://stalica.net/save-text', // Replace with your backend URL
     MAX_SIZE: 2.5 * 1024 * 1024, // 2.5MB in bytes
     MAX_CHARS: 2621440 // 2.5MB worth of characters
 };
