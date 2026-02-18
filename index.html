@@ -22,7 +22,8 @@
                     id="customId" 
                     placeholder="Leave empty for random 6-digit ID" 
                     maxlength="6"
-                    pattern="[0-9]{6}"
+                    pattern="[0-9]*"
+                    inputmode="numeric"
                 >
                 <span class="id-status"></span>
             </div>
@@ -36,8 +37,8 @@
                 </svg>
                 <p>Drop .txt, .md, or other text files here</p>
                 <p class="file-size-limit">Max size: 2.5MB</p>
-                <input type="file" id="fileInput" accept=".txt,.md,.json,.xml,.csv,.log,.js,.css,.html,.py,.java,.cpp,.c,.h" hidden>
-                <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">Browse Files</button>
+                <input type="file" id="fileInput" accept=".txt,.md,.json,.xml,.csv,.log,.js,.css,.html,.py,.java,.cpp,.c,.h,.php,.rb,.go,.rs,.swift,.kt" hidden>
+                <button class="btn-secondary" type="button" onclick="document.getElementById('fileInput').click()">Browse Files</button>
             </div>
 
             <!-- Text Area -->
@@ -66,12 +67,13 @@
                     <option value="py">Python (.py)</option>
                     <option value="java">Java (.java)</option>
                     <option value="cpp">C++ (.cpp)</option>
+                    <option value="php">PHP (.php)</option>
                     <option value="other">Other</option>
                 </select>
             </div>
 
             <!-- Submit Button -->
-            <button class="btn-primary" id="submitBtn">
+            <button class="btn-primary" id="submitBtn" type="button">
                 <span>🚀 Save Text</span>
             </button>
 
@@ -83,10 +85,10 @@
                 </div>
                 <div class="result-link">
                     <input type="text" id="resultLink" readonly>
-                    <button class="btn-copy" id="copyBtn">Copy Link</button>
+                    <button class="btn-copy" id="copyBtn" type="button">Copy Link</button>
                 </div>
                 <p class="expiry-notice">⏰ This save will expire in 48 hours</p>
-                <button class="btn-secondary" onclick="location.reload()">Create Another</button>
+                <button class="btn-secondary" type="button" onclick="location.reload()">Create Another</button>
             </div>
         </main>
 
@@ -99,15 +101,16 @@
                     id="searchId" 
                     placeholder="Enter 6-digit ID" 
                     maxlength="6"
-                    pattern="[0-9]{6}"
+                    pattern="[0-9]*"
+                    inputmode="numeric"
                 >
-                <button class="btn-primary" id="searchBtn">Search</button>
+                <button class="btn-primary" id="searchBtn" type="button">Search</button>
             </div>
         </section>
 
         <footer>
             <p>All saves are automatically deleted after 48 hours | Max file size: 2.5MB</p>
-            <p>Made with ❤️ | <a href="https://github.com/yourusername/save-text" target="_blank">GitHub</a></p>
+            <p>Made with ❤️ | <a href="https://github.com" target="_blank">GitHub</a></p>
         </footer>
     </div>
 
