@@ -3,114 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaveText - Share Text & Code Instantly</title>
+    <title>SaveText - Share Text Instantly</title>
+    <meta name="description" content="Share text, code, and markdown files instantly with a simple 6-digit code. Auto-expires in 48 hours.">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>S</text></svg>">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📝 SaveText</h1>
-            <p class="subtitle">Share text, code, and markdown files instantly</p>
-        </header>
-
-        <main>
-            <!-- Custom ID Section -->
-            <div class="custom-id-section">
-                <label for="customId">Custom ID (optional):</label>
-                <input 
-                    type="text" 
-                    id="customId" 
-                    placeholder="Leave empty for random 6-digit ID" 
-                    maxlength="6"
-                    pattern="[0-9]*"
-                    inputmode="numeric"
-                >
-                <span class="id-status"></span>
-            </div>
-
-            <!-- Drop Zone -->
-            <div class="drop-zone" id="dropZone">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <p>Drop .txt, .md, or other text files here</p>
-                <p class="file-size-limit">Max size: 2.5MB</p>
-                <input type="file" id="fileInput" accept=".txt,.md,.json,.xml,.csv,.log,.js,.css,.html,.py,.java,.cpp,.c,.h,.php,.rb,.go,.rs,.swift,.kt" hidden>
-                <button class="btn-secondary" type="button" onclick="document.getElementById('fileInput').click()">Browse Files</button>
-            </div>
-
-            <!-- Text Area -->
-            <div class="editor-section">
-                <div class="editor-header">
-                    <label>Or paste your content here:</label>
-                    <span class="char-count">0 / 2,621,440 characters</span>
+    <div class="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <i class="bi bi-file-text"></i>
+                    <span>SaveText</span>
+                </a>
+                <div class="nav-links">
+                    <a href="https://github.com/save-text/save-text.github.io" target="_blank" rel="noopener" class="nav-link">
+                        <i class="bi bi-github"></i>
+                        <span>GitHub</span>
+                    </a>
                 </div>
-                <textarea 
-                    id="textEditor" 
-                    placeholder="Paste your text, code, or markdown here...&#10;Supports all Unicode characters: 你好, مرحبا, Привет, 🚀"
-                ></textarea>
             </div>
+        </nav>
 
-            <!-- File Type Selector -->
-            <div class="file-type-section">
-                <label for="fileType">File Type:</label>
-                <select id="fileType">
-                    <option value="txt">Plain Text (.txt)</option>
-                    <option value="md">Markdown (.md)</option>
-                    <option value="json">JSON (.json)</option>
-                    <option value="xml">XML (.xml)</option>
-                    <option value="html">HTML (.html)</option>
-                    <option value="css">CSS (.css)</option>
-                    <option value="js">JavaScript (.js)</option>
-                    <option value="py">Python (.py)</option>
-                    <option value="java">Java (.java)</option>
-                    <option value="cpp">C++ (.cpp)</option>
-                    <option value="php">PHP (.php)</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Hero Section -->
+                <section class="hero">
+                    <h1>Share text instantly</h1>
+                    <p>Paste, save, share. Auto-expires in 48 hours.</p>
+                </section>
 
-            <!-- Submit Button -->
-            <button class="btn-primary" id="submitBtn" type="button">
-                <span>🚀 Save Text</span>
-            </button>
+                <!-- Editor Section -->
+                <section class="editor-card">
+                    <!-- Custom ID -->
+                    <div class="input-group">
+                        <label for="customId">
+                            <i class="bi bi-hash"></i>
+                            Custom ID
+                            <span class="label-hint">(optional)</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="customId" 
+                                placeholder="6-digit code" 
+                                maxlength="6"
+                                pattern="[0-9]*"
+                                inputmode="numeric"
+                                autocomplete="off"
+                            >
+                            <span class="id-status"></span>
+                        </div>
+                    </div>
 
-            <!-- Result Section -->
-            <div class="result-section hidden" id="resultSection">
-                <h3>✅ Text Saved Successfully!</h3>
-                <div class="result-id">
-                    <strong>Your ID:</strong> <span id="resultId"></span>
-                </div>
-                <div class="result-link">
-                    <input type="text" id="resultLink" readonly>
-                    <button class="btn-copy" id="copyBtn" type="button">Copy Link</button>
-                </div>
-                <p class="expiry-notice">⏰ This save will expire in 48 hours</p>
-                <button class="btn-secondary" type="button" onclick="location.reload()">Create Another</button>
+                    <!-- Drop Zone -->
+                    <div class="drop-zone" id="dropZone">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <p>Drop file here or click to browse</p>
+                        <span class="drop-hint">Max 2.5MB — .txt, .md, .json, .js, .py, etc.</span>
+                        <input 
+                            type="file" 
+                            id="fileInput" 
+                            accept=".txt,.md,.json,.xml,.csv,.log,.js,.css,.html,.py,.java,.cpp,.c,.h,.php,.rb,.go,.rs,.swift,.kt,.sql,.yaml,.yml,.toml,.ini,.sh,.bash"
+                            hidden
+                        >
+                    </div>
+
+                    <!-- Text Editor -->
+                    <div class="textarea-group">
+                        <div class="textarea-header">
+                            <label for="textEditor">
+                                <i class="bi bi-code-slash"></i>
+                                Content
+                            </label>
+                            <span class="char-count">0 / 2.5MB</span>
+                        </div>
+                        <textarea 
+                            id="textEditor" 
+                            placeholder="Paste your text or code here..."
+                            spellcheck="false"
+                        ></textarea>
+                    </div>
+
+                    <!-- File Type -->
+                    <div class="select-group">
+                        <label for="fileType">
+                            <i class="bi bi-file-earmark-code"></i>
+                            Syntax
+                        </label>
+                        <select id="fileType">
+                            <option value="txt">Plain Text</option>
+                            <option value="md">Markdown</option>
+                            <option value="json">JSON</option>
+                            <option value="xml">XML</option>
+                            <option value="html">HTML</option>
+                            <option value="css">CSS</option>
+                            <option value="js">JavaScript</option>
+                            <option value="py">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="php">PHP</option>
+                            <option value="sql">SQL</option>
+                            <option value="yaml">YAML</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button class="btn btn-primary" id="submitBtn" type="button">
+                        <i class="bi bi-send"></i>
+                        <span>Create Save</span>
+                    </button>
+
+                    <!-- Result Section -->
+                    <div class="result hidden" id="resultSection">
+                        <div class="result-header">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Saved successfully</span>
+                        </div>
+                        <div class="result-body">
+                            <div class="result-id">
+                                <span class="result-label">ID</span>
+                                <span class="result-value" id="resultId"></span>
+                            </div>
+                            <div class="result-link-group">
+                                <input type="text" id="resultLink" readonly>
+                                <button class="btn btn-icon" id="copyBtn" type="button" title="Copy link">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <span class="result-expiry">
+                                <i class="bi bi-clock"></i>
+                                Expires in 48 hours
+                            </span>
+                        </div>
+                        <button class="btn btn-secondary" type="button" onclick="location.reload()">
+                            <i class="bi bi-plus"></i>
+                            <span>New Save</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Search Section -->
+                <section class="search-card">
+                    <h2>
+                        <i class="bi bi-search"></i>
+                        Retrieve
+                    </h2>
+                    <div class="search-form">
+                        <input 
+                            type="text" 
+                            id="searchId" 
+                            placeholder="Enter 6-digit code"
+                            maxlength="6"
+                            pattern="[0-9]*"
+                            inputmode="numeric"
+                            autocomplete="off"
+                        >
+                        <button class="btn btn-primary" id="searchBtn" type="button">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
             </div>
         </main>
 
-        <!-- Search Section -->
-        <section class="search-section">
-            <h2>🔍 Retrieve Saved Text</h2>
-            <div class="search-box">
-                <input 
-                    type="text" 
-                    id="searchId" 
-                    placeholder="Enter 6-digit ID" 
-                    maxlength="6"
-                    pattern="[0-9]*"
-                    inputmode="numeric"
-                >
-                <button class="btn-primary" id="searchBtn" type="button">Search</button>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-brand">
+                    <a href="/" class="footer-logo">
+                        <i class="bi bi-file-text"></i>
+                        SaveText
+                    </a>
+                    <p>Simple, secure text sharing.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="/about.html">About</a>
+                        <a href="https://github.com/save-text/save-text.github.io" target="_blank" rel="noopener">Source Code</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="/privacy.html">Privacy</a>
+                        <a href="/terms.html">Terms</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Connect</h4>
+                        <a href="https://github.com/save-text" target="_blank" rel="noopener">
+                            <i class="bi bi-github"></i>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 SaveText. All saves expire after 48 hours.</p>
+                </div>
             </div>
-        </section>
-
-        <footer>
-            <p>All saves are automatically deleted after 48 hours | Max file size: 2.5MB</p>
-            <p>Made with ❤️ | <a href="https://github.com" target="_blank">GitHub</a></p>
         </footer>
     </div>
 
