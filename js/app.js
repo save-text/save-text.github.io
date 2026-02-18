@@ -1,11 +1,17 @@
-// Configuration - UPDATED FOR YOUR SETUP
+// ============================================
+// SaveText - Application JavaScript
+// ============================================
+
 const CONFIG = {
     API_URL: 'https://stalica.net/save-text/api',
     MAX_SIZE: 2.5 * 1024 * 1024,
     MAX_CHARS: 2621440
 };
 
-// Utility Functions
+// ============================================
+// Utilities
+// ============================================
+
 const utils = {
     generateId() {
         return Math.floor(100000 + Math.random() * 900000).toString();
@@ -27,11 +33,11 @@ const utils = {
     },
 
     formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return '0 B';
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB'];
+        const sizes = ['B', 'KB', 'MB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     },
 
     getFileExtension(type) {
@@ -39,7 +45,8 @@ const utils = {
             'txt': 'txt', 'md': 'md', 'json': 'json',
             'xml': 'xml', 'html': 'html', 'css': 'css',
             'js': 'js', 'py': 'py', 'java': 'java',
-            'cpp': 'cpp', 'php': 'php', 'other': 'txt'
+            'cpp': 'cpp', 'php': 'php', 'sql': 'sql',
+            'yaml': 'yaml', 'other': 'txt'
         };
         return extensions[type] || 'txt';
     },
@@ -52,24 +59,35 @@ const utils = {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
         if (hours <= 0 && minutes <= 0) return 'Expired';
+        if (hours < 1) return `${minutes}m`;
         return `${hours}h ${minutes}m`;
+    },
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 };
 
+// ============================================
 // Main Application
+// ============================================
+
 class SaveTextApp {
     constructor() {
         this.init();
     }
 
     init() {
-        this.setupElements();
-        this.setupEventListeners();
+        this.cacheElements();
+        this.bindEvents();
         this.checkViewMode();
     }
 
-    setupElements() {
-        this.elements = {
+    cacheElements() {
+        this.els = {
+            // Main page elements
             customId: document.getElementById('customId'),
             idStatus: document.querySelector('.id-status'),
             dropZone: document.getElementById('dropZone'),
@@ -83,105 +101,123 @@ class SaveTextApp {
             resultLink: document.getElementById('resultLink'),
             copyBtn: document.getElementById('copyBtn'),
             searchId: document.getElementById('searchId'),
-            searchBtn: document.getElementById('searchBtn')
+            searchBtn: document.getElementById('searchBtn'),
+            
+            // View page elements
+            viewerContent: document.getElementById('viewerContent'),
+            viewerId: document.getElementById('viewerId'),
+            viewerType: document.getElementById('viewerType'),
+            viewerExpires: document.getElementById('viewerExpires'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            copyContentBtn: document.getElementById('copyContentBtn'),
+            rawBtn: document.getElementById('rawBtn')
         };
     }
 
-    setupEventListeners() {
-        if (this.elements.customId) {
-            this.elements.customId.addEventListener('input', (e) => {
+    bindEvents() {
+        // Custom ID validation
+        if (this.els.customId) {
+            this.els.customId.addEventListener('input', (e) => {
                 const value = e.target.value.replace(/\D/g, '');
                 e.target.value = value;
                 this.validateCustomId(value);
             });
         }
 
-        if (this.elements.dropZone) {
-            this.elements.dropZone.addEventListener('click', () => {
-                this.elements.fileInput.click();
+        // Drop zone
+        if (this.els.dropZone) {
+            this.els.dropZone.addEventListener('click', () => {
+                this.els.fileInput.click();
             });
 
-            this.elements.dropZone.addEventListener('dragover', (e) => {
+            this.els.dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                this.elements.dropZone.classList.add('drag-over');
+                this.els.dropZone.classList.add('drag-over');
             });
 
-            this.elements.dropZone.addEventListener('dragleave', () => {
-                this.elements.dropZone.classList.remove('drag-over');
+            this.els.dropZone.addEventListener('dragleave', () => {
+                this.els.dropZone.classList.remove('drag-over');
             });
 
-            this.elements.dropZone.addEventListener('drop', (e) => {
+            this.els.dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                this.elements.dropZone.classList.remove('drag-over');
+                this.els.dropZone.classList.remove('drag-over');
                 if (e.dataTransfer.files.length > 0) {
                     this.handleFileUpload(e.dataTransfer.files[0]);
                 }
             });
         }
 
-        if (this.elements.fileInput) {
-            this.elements.fileInput.addEventListener('change', (e) => {
+        // File input
+        if (this.els.fileInput) {
+            this.els.fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
                     this.handleFileUpload(e.target.files[0]);
                 }
             });
         }
 
-        if (this.elements.textEditor) {
-            this.elements.textEditor.addEventListener('input', (e) => {
-                this.updateCharCount(e.target.value.length);
+        // Text editor
+        if (this.els.textEditor) {
+            this.els.textEditor.addEventListener('input', (e) => {
+                this.updateCharCount(e.target.value);
             });
         }
 
-        if (this.elements.submitBtn) {
-            this.elements.submitBtn.addEventListener('click', () => {
+        // Submit button
+        if (this.els.submitBtn) {
+            this.els.submitBtn.addEventListener('click', () => {
                 this.handleSubmit();
             });
         }
 
-        if (this.elements.copyBtn) {
-            this.elements.copyBtn.addEventListener('click', () => {
-                this.copyToClipboard(this.elements.resultLink.value);
+        // Copy button
+        if (this.els.copyBtn) {
+            this.els.copyBtn.addEventListener('click', () => {
+                this.copyToClipboard(this.els.resultLink.value, this.els.copyBtn);
             });
         }
 
-        if (this.elements.searchBtn) {
-            this.elements.searchBtn.addEventListener('click', () => {
+        // Search
+        if (this.els.searchBtn) {
+            this.els.searchBtn.addEventListener('click', () => {
                 this.handleSearch();
             });
         }
 
-        if (this.elements.searchId) {
-            this.elements.searchId.addEventListener('input', (e) => {
+        if (this.els.searchId) {
+            this.els.searchId.addEventListener('input', (e) => {
                 e.target.value = e.target.value.replace(/\D/g, '');
             });
 
-            this.elements.searchId.addEventListener('keypress', (e) => {
+            this.els.searchId.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.handleSearch();
             });
         }
     }
 
     async validateCustomId(id) {
+        if (!this.els.idStatus) return;
+
         if (!id) {
-            this.elements.idStatus.textContent = '';
-            this.elements.idStatus.className = 'id-status';
+            this.els.idStatus.textContent = '';
+            this.els.idStatus.className = 'id-status';
             return;
         }
 
         if (!utils.validateId(id)) {
-            this.elements.idStatus.textContent = '❌ Must be 6 digits';
-            this.elements.idStatus.className = 'id-status taken';
+            this.els.idStatus.innerHTML = '<i class="bi bi-x-circle"></i>';
+            this.els.idStatus.className = 'id-status taken';
             return;
         }
 
         const available = await utils.checkIdAvailability(id);
         if (available) {
-            this.elements.idStatus.textContent = '✅ Available';
-            this.elements.idStatus.className = 'id-status available';
+            this.els.idStatus.innerHTML = '<i class="bi bi-check-circle"></i>';
+            this.els.idStatus.className = 'id-status available';
         } else {
-            this.elements.idStatus.textContent = '❌ Already taken';
-            this.elements.idStatus.className = 'id-status taken';
+            this.els.idStatus.innerHTML = '<i class="bi bi-x-circle"></i>';
+            this.els.idStatus.className = 'id-status taken';
         }
     }
 
@@ -189,33 +225,36 @@ class SaveTextApp {
         if (!file) return;
 
         if (file.size > CONFIG.MAX_SIZE) {
-            alert(`File too large! Max size is ${utils.formatBytes(CONFIG.MAX_SIZE)}`);
+            alert(`File too large. Maximum size is ${utils.formatBytes(CONFIG.MAX_SIZE)}`);
             return;
         }
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.elements.textEditor.value = e.target.result;
-            this.updateCharCount(e.target.result.length);
+            this.els.textEditor.value = e.target.result;
+            this.updateCharCount(e.target.result);
 
             const ext = file.name.split('.').pop().toLowerCase();
-            const option = Array.from(this.elements.fileType.options).find(
+            const option = Array.from(this.els.fileType.options).find(
                 opt => opt.value === ext
             );
             if (option) {
-                this.elements.fileType.value = ext;
+                this.els.fileType.value = ext;
             }
         };
         reader.readAsText(file);
     }
 
-    updateCharCount(length) {
-        this.elements.charCount.textContent = `${length.toLocaleString()} / ${CONFIG.MAX_CHARS.toLocaleString()} characters`;
+    updateCharCount(content) {
+        if (!this.els.charCount) return;
         
-        if (length > CONFIG.MAX_CHARS) {
-            this.elements.charCount.style.color = 'var(--error)';
+        const bytes = new Blob([content]).size;
+        this.els.charCount.textContent = `${utils.formatBytes(bytes)} / 2.5MB`;
+        
+        if (bytes > CONFIG.MAX_SIZE) {
+            this.els.charCount.style.color = 'var(--color-error)';
         } else {
-            this.elements.charCount.style.color = 'var(--text-secondary)';
+            this.els.charCount.style.color = '';
         }
     }
 
@@ -225,39 +264,42 @@ class SaveTextApp {
     }
 
     async handleSubmit() {
-        const content = this.elements.textEditor.value.trim();
+        const content = this.els.textEditor.value.trim();
         
         if (!content) {
-            alert('Please enter some content!');
+            alert('Please enter some content');
             return;
         }
 
         if (!this.validateContent(content)) {
-            alert(`Content too large! Max size is ${utils.formatBytes(CONFIG.MAX_SIZE)}`);
+            alert(`Content exceeds maximum size of ${utils.formatBytes(CONFIG.MAX_SIZE)}`);
             return;
         }
 
-        let id = this.elements.customId.value.trim();
+        let id = this.els.customId.value.trim();
         
         if (!id) {
             id = utils.generateId();
-            while (!(await utils.checkIdAvailability(id))) {
+            let attempts = 0;
+            while (!(await utils.checkIdAvailability(id)) && attempts < 10) {
                 id = utils.generateId();
+                attempts++;
             }
         } else {
             if (!utils.validateId(id)) {
-                alert('ID must be exactly 6 digits!');
+                alert('ID must be exactly 6 digits');
                 return;
             }
 
             if (!(await utils.checkIdAvailability(id))) {
-                alert('This ID is already taken!');
+                alert('This ID is already taken');
                 return;
             }
         }
 
-        this.elements.submitBtn.disabled = true;
-        this.elements.submitBtn.innerHTML = '<span>⏳ Saving...</span>';
+        this.els.submitBtn.disabled = true;
+        const originalContent = this.els.submitBtn.innerHTML;
+        this.els.submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i><span>Saving...</span>';
 
         try {
             const response = await fetch(`${CONFIG.API_URL}/save.php`, {
@@ -268,7 +310,7 @@ class SaveTextApp {
                 body: JSON.stringify({
                     id: id,
                     content: content,
-                    fileType: this.elements.fileType.value
+                    fileType: this.els.fileType.value
                 })
             });
 
@@ -283,39 +325,42 @@ class SaveTextApp {
             alert('Error: ' + error.message);
             console.error('Save error:', error);
         } finally {
-            this.elements.submitBtn.disabled = false;
-            this.elements.submitBtn.innerHTML = '<span>🚀 Save Text</span>';
+            this.els.submitBtn.disabled = false;
+            this.els.submitBtn.innerHTML = originalContent;
         }
     }
 
     showResult(id) {
         const url = `${window.location.origin}/${id}`;
         
-        this.elements.resultId.textContent = id;
-        this.elements.resultLink.value = url;
-        this.elements.resultSection.classList.remove('hidden');
+        this.els.resultId.textContent = id;
+        this.els.resultLink.value = url;
+        this.els.resultSection.classList.remove('hidden');
 
-        this.elements.resultSection.scrollIntoView({ behavior: 'smooth' });
+        this.els.resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    copyToClipboard(text) {
+    copyToClipboard(text, button) {
         navigator.clipboard.writeText(text).then(() => {
-            const originalText = this.elements.copyBtn.textContent;
-            this.elements.copyBtn.textContent = '✅ Copied!';
-            setTimeout(() => {
-                this.elements.copyBtn.textContent = originalText;
-            }, 2000);
+            if (button) {
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.className = 'bi bi-check';
+                    setTimeout(() => {
+                        icon.className = 'bi bi-clipboard';
+                    }, 2000);
+                }
+            }
         }).catch(err => {
             console.error('Copy failed:', err);
-            alert('Failed to copy to clipboard');
         });
     }
 
     handleSearch() {
-        const id = this.elements.searchId.value.trim();
+        const id = this.els.searchId.value.trim();
         
         if (!utils.validateId(id)) {
-            alert('Please enter a valid 6-digit ID');
+            alert('Please enter a valid 6-digit code');
             return;
         }
 
@@ -326,20 +371,12 @@ class SaveTextApp {
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id');
         
-        if (id && document.getElementById('viewerContent')) {
+        if (id && this.els.viewerContent) {
             this.loadSavedText(id);
         }
     }
 
     async loadSavedText(id) {
-        const viewerContent = document.getElementById('viewerContent');
-        const viewerId = document.getElementById('viewerId');
-        const viewerType = document.getElementById('viewerType');
-        const viewerExpires = document.getElementById('viewerExpires');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const copyContentBtn = document.getElementById('copyContentBtn');
-        const rawBtn = document.getElementById('rawBtn');
-
         try {
             const response = await fetch(`${CONFIG.API_URL}/get.php?id=${id}`);
             const data = await response.json();
@@ -348,44 +385,45 @@ class SaveTextApp {
                 throw new Error(data.message || 'Not found');
             }
 
-            viewerId.textContent = id;
-            viewerType.textContent = data.fileType.toUpperCase();
-            viewerExpires.textContent = utils.formatExpiry(data.expiresAt);
+            // Update metadata
+            this.els.viewerId.textContent = id;
+            this.els.viewerType.textContent = data.fileType.toUpperCase();
+            this.els.viewerExpires.textContent = utils.formatExpiry(data.expiresAt);
 
-            const codeLanguages = ['js', 'py', 'java', 'cpp', 'html', 'css', 'json', 'xml', 'php'];
+            // Render content
+            const codeLanguages = ['js', 'py', 'java', 'cpp', 'html', 'css', 'json', 'xml', 'php', 'sql', 'yaml'];
             
             if (codeLanguages.includes(data.fileType)) {
-                viewerContent.innerHTML = `<pre><code class="language-${data.fileType}">${this.escapeHtml(data.content)}</code></pre>`;
+                this.els.viewerContent.innerHTML = `<pre><code class="language-${data.fileType}">${utils.escapeHtml(data.content)}</code></pre>`;
                 if (typeof hljs !== 'undefined') {
                     hljs.highlightAll();
                 }
             } else {
-                viewerContent.innerHTML = `<pre>${this.escapeHtml(data.content)}</pre>`;
+                this.els.viewerContent.innerHTML = `<pre><code>${utils.escapeHtml(data.content)}</code></pre>`;
             }
 
-            downloadBtn.addEventListener('click', () => {
+            // Bind action buttons
+            this.els.downloadBtn.addEventListener('click', () => {
                 this.downloadContent(data.content, id, data.fileType);
             });
 
-            copyContentBtn.addEventListener('click', () => {
-                this.copyToClipboard(data.content);
-                copyContentBtn.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    copyContentBtn.textContent = '📋 Copy';
-                }, 2000);
+            this.els.copyContentBtn.addEventListener('click', () => {
+                this.copyToClipboard(data.content, this.els.copyContentBtn);
             });
 
-            rawBtn.addEventListener('click', () => {
+            this.els.rawBtn.addEventListener('click', () => {
                 window.open(`${CONFIG.API_URL}/raw.php?id=${id}`, '_blank');
             });
 
         } catch (error) {
-            viewerContent.innerHTML = `
-                <div class="error-message">
-                    <h2>❌ Not Found</h2>
+            this.els.viewerContent.innerHTML = `
+                <div class="error-state">
+                    <i class="bi bi-file-earmark-x"></i>
+                    <h2>Not Found</h2>
                     <p>This save doesn't exist or has expired.</p>
-                    <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none; width: auto;">
-                        Create New Save
+                    <a href="/" class="btn btn-primary">
+                        <i class="bi bi-plus"></i>
+                        <span>Create New</span>
                     </a>
                 </div>
             `;
@@ -403,14 +441,9 @@ class SaveTextApp {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
 }
 
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     new SaveTextApp();
 });
