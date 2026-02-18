@@ -1,8 +1,8 @@
-// Configuration
+// Configuration - UPDATED FOR YOUR SETUP
 const CONFIG = {
-    API_URL: 'https://stalica.net/save-text', // Replace with your backend URL
-    MAX_SIZE: 2.5 * 1024 * 1024, // 2.5MB in bytes
-    MAX_CHARS: 2621440 // 2.5MB worth of characters
+    API_URL: 'https://stalica.net/save-text/api',
+    MAX_SIZE: 2.5 * 1024 * 1024,
+    MAX_CHARS: 2621440
 };
 
 // Utility Functions
@@ -39,7 +39,7 @@ const utils = {
             'txt': 'txt', 'md': 'md', 'json': 'json',
             'xml': 'xml', 'html': 'html', 'css': 'css',
             'js': 'js', 'py': 'py', 'java': 'java',
-            'cpp': 'cpp', 'other': 'txt'
+            'cpp': 'cpp', 'php': 'php', 'other': 'txt'
         };
         return extensions[type] || 'txt';
     },
@@ -50,6 +50,8 @@ const utils = {
         const diff = date - now;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (hours <= 0 && minutes <= 0) return 'Expired';
         return `${hours}h ${minutes}m`;
     }
 };
@@ -86,14 +88,14 @@ class SaveTextApp {
     }
 
     setupEventListeners() {
-        // Custom ID validation
         if (this.elements.customId) {
             this.elements.customId.addEventListener('input', (e) => {
-                this.validateCustomId(e.target.value);
+                const value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+                this.validateCustomId(value);
             });
         }
 
-        // Drop zone
         if (this.elements.dropZone) {
             this.elements.dropZone.addEventListener('click', () => {
                 this.elements.fileInput.click();
@@ -111,43 +113,47 @@ class SaveTextApp {
             this.elements.dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 this.elements.dropZone.classList.remove('drag-over');
-                this.handleFileUpload(e.dataTransfer.files[0]);
+                if (e.dataTransfer.files.length > 0) {
+                    this.handleFileUpload(e.dataTransfer.files[0]);
+                }
             });
         }
 
-        // File input
         if (this.elements.fileInput) {
             this.elements.fileInput.addEventListener('change', (e) => {
-                this.handleFileUpload(e.target.files[0]);
+                if (e.target.files.length > 0) {
+                    this.handleFileUpload(e.target.files[0]);
+                }
             });
         }
 
-        // Text editor
         if (this.elements.textEditor) {
             this.elements.textEditor.addEventListener('input', (e) => {
                 this.updateCharCount(e.target.value.length);
-                this.validateContent(e.target.value);
             });
         }
 
-        // Submit button
         if (this.elements.submitBtn) {
             this.elements.submitBtn.addEventListener('click', () => {
                 this.handleSubmit();
             });
         }
 
-        // Copy button
         if (this.elements.copyBtn) {
             this.elements.copyBtn.addEventListener('click', () => {
                 this.copyToClipboard(this.elements.resultLink.value);
             });
         }
 
-        // Search
         if (this.elements.searchBtn) {
             this.elements.searchBtn.addEventListener('click', () => {
                 this.handleSearch();
+            });
+        }
+
+        if (this.elements.searchId) {
+            this.elements.searchId.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '');
             });
 
             this.elements.searchId.addEventListener('keypress', (e) => {
@@ -192,7 +198,6 @@ class SaveTextApp {
             this.elements.textEditor.value = e.target.result;
             this.updateCharCount(e.target.result.length);
 
-            // Auto-detect file type
             const ext = file.name.split('.').pop().toLowerCase();
             const option = Array.from(this.elements.fileType.options).find(
                 opt => opt.value === ext
@@ -234,15 +239,12 @@ class SaveTextApp {
 
         let id = this.elements.customId.value.trim();
         
-        // Generate random ID if not provided
         if (!id) {
             id = utils.generateId();
-            // Ensure it's unique
             while (!(await utils.checkIdAvailability(id))) {
                 id = utils.generateId();
             }
         } else {
-            // Validate custom ID
             if (!utils.validateId(id)) {
                 alert('ID must be exactly 6 digits!');
                 return;
@@ -279,6 +281,8 @@ class SaveTextApp {
             }
         } catch (error) {
             alert('Error: ' + error.message);
+            console.error('Save error:', error);
+        } finally {
             this.elements.submitBtn.disabled = false;
             this.elements.submitBtn.innerHTML = '<span>🚀 Save Text</span>';
         }
@@ -291,7 +295,6 @@ class SaveTextApp {
         this.elements.resultLink.value = url;
         this.elements.resultSection.classList.remove('hidden');
 
-        // Scroll to result
         this.elements.resultSection.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -302,6 +305,9 @@ class SaveTextApp {
             setTimeout(() => {
                 this.elements.copyBtn.textContent = originalText;
             }, 2000);
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            alert('Failed to copy to clipboard');
         });
     }
 
@@ -317,12 +323,11 @@ class SaveTextApp {
     }
 
     checkViewMode() {
-        // Check if we're on a view page
-        const path = window.location.pathname;
-        const match = path.match(/\/(\d{6})/);
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
         
-        if (match && document.getElementById('viewerContent')) {
-            this.loadSavedText(match[1]);
+        if (id && document.getElementById('viewerContent')) {
+            this.loadSavedText(id);
         }
     }
 
@@ -343,25 +348,21 @@ class SaveTextApp {
                 throw new Error(data.message || 'Not found');
             }
 
-            // Update header info
             viewerId.textContent = id;
             viewerType.textContent = data.fileType.toUpperCase();
             viewerExpires.textContent = utils.formatExpiry(data.expiresAt);
 
-            // Display content
-            const codeLanguages = ['js', 'py', 'java', 'cpp', 'html', 'css', 'json', 'xml'];
+            const codeLanguages = ['js', 'py', 'java', 'cpp', 'html', 'css', 'json', 'xml', 'php'];
             
             if (codeLanguages.includes(data.fileType)) {
                 viewerContent.innerHTML = `<pre><code class="language-${data.fileType}">${this.escapeHtml(data.content)}</code></pre>`;
-                hljs.highlightAll();
-            } else if (data.fileType === 'md') {
-                // Simple markdown rendering (you could use a library like marked.js)
-                viewerContent.innerHTML = `<pre>${this.escapeHtml(data.content)}</pre>`;
+                if (typeof hljs !== 'undefined') {
+                    hljs.highlightAll();
+                }
             } else {
                 viewerContent.innerHTML = `<pre>${this.escapeHtml(data.content)}</pre>`;
             }
 
-            // Setup action buttons
             downloadBtn.addEventListener('click', () => {
                 this.downloadContent(data.content, id, data.fileType);
             });
@@ -380,12 +381,10 @@ class SaveTextApp {
 
         } catch (error) {
             viewerContent.innerHTML = `
-                <div style="text-align: center; padding: 3rem;">
-                    <h2 style="color: var(--error); margin-bottom: 1rem;">❌ Not Found</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
-                        This save doesn't exist or has expired.
-                    </p>
-                    <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none;">
+                <div class="error-message">
+                    <h2>❌ Not Found</h2>
+                    <p>This save doesn't exist or has expired.</p>
+                    <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none; width: auto;">
                         Create New Save
                     </a>
                 </div>
@@ -394,7 +393,7 @@ class SaveTextApp {
     }
 
     downloadContent(content, id, fileType) {
-        const blob = new Blob([content], { type: 'text/plain' });
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -412,7 +411,6 @@ class SaveTextApp {
     }
 }
 
-// Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     new SaveTextApp();
 });
