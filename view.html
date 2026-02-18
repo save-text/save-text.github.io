@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Saved Text - SaveText</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><a href="/">📝 SaveText</a></h1>
+        </header>
+
+        <main>
+            <div class="viewer-section">
+                <div class="viewer-header">
+                    <div class="viewer-info">
+                        <span class="viewer-id">ID: <strong id="viewerId"></strong></span>
+                        <span class="viewer-type">Type: <strong id="viewerType"></strong></span>
+                        <span class="viewer-expires">Expires: <strong id="viewerExpires"></strong></span>
+                    </div>
+                    <div class="viewer-actions">
+                        <button class="btn-secondary" id="downloadBtn">⬇️ Download</button>
+                        <button class="btn-secondary" id="copyContentBtn">📋 Copy</button>
+                        <button class="btn-secondary" id="rawBtn">🔗 Raw</button>
+                    </div>
+                </div>
+
+                <div class="viewer-content" id="viewerContent">
+                    <div class="loader">Loading...</div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p><a href="/">← Create New Save</a></p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
