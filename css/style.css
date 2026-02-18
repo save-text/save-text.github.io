@@ -44,6 +44,7 @@ header h1 {
     background: linear-gradient(135deg, var(--primary-color), #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 header h1 a {
@@ -51,6 +52,7 @@ header h1 a {
     background: linear-gradient(135deg, var(--primary-color), #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .subtitle {
@@ -58,7 +60,6 @@ header h1 a {
     font-size: 1.1rem;
 }
 
-/* Custom ID Section */
 .custom-id-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
@@ -107,7 +108,6 @@ header h1 a {
     color: var(--error);
 }
 
-/* Drop Zone */
 .drop-zone {
     border: 3px dashed var(--border);
     border-radius: 12px;
@@ -141,7 +141,6 @@ header h1 a {
     margin-bottom: 1rem !important;
 }
 
-/* Editor Section */
 .editor-section {
     margin-bottom: 2rem;
 }
@@ -181,7 +180,6 @@ header h1 a {
     border-color: var(--primary-color);
 }
 
-/* File Type Section */
 .file-type-section {
     margin-bottom: 2rem;
 }
@@ -209,7 +207,6 @@ header h1 a {
     border-color: var(--primary-color);
 }
 
-/* Buttons */
 .btn-primary,
 .btn-secondary,
 .btn-copy {
@@ -229,7 +226,7 @@ header h1 a {
     width: 100%;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     background: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
@@ -239,6 +236,7 @@ header h1 a {
     background: var(--secondary-color);
     cursor: not-allowed;
     transform: none;
+    opacity: 0.6;
 }
 
 .btn-secondary {
@@ -262,7 +260,6 @@ header h1 a {
     background: #059669;
 }
 
-/* Result Section */
 .result-section {
     background: var(--surface);
     border: 2px solid var(--success);
@@ -315,7 +312,6 @@ header h1 a {
     font-size: 0.95rem;
 }
 
-/* Search Section */
 .search-section {
     margin: 4rem 0 2rem;
     padding: 2rem;
@@ -356,7 +352,6 @@ header h1 a {
     width: auto;
 }
 
-/* Viewer Section */
 .viewer-section {
     background: var(--surface);
     border-radius: 12px;
@@ -410,6 +405,7 @@ header h1 a {
 .viewer-content pre {
     margin: 0;
     background: transparent !important;
+    padding: 0 !important;
 }
 
 .viewer-content code {
@@ -424,7 +420,21 @@ header h1 a {
     padding: 3rem;
 }
 
-/* Footer */
+.error-message {
+    text-align: center;
+    padding: 3rem;
+}
+
+.error-message h2 {
+    color: var(--error);
+    margin-bottom: 1rem;
+}
+
+.error-message p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
 footer {
     text-align: center;
     margin-top: 4rem;
@@ -443,7 +453,6 @@ footer a:hover {
     text-decoration: underline;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     header h1 {
         font-size: 2rem;
