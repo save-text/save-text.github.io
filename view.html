@@ -3,39 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Saved Text - SaveText</title>
+    <title>View Save - SaveText</title>
+    <meta name="description" content="View saved text on SaveText.">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>S</text></svg>">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><a href="/">📝 SaveText</a></h1>
-        </header>
-
-        <main>
-            <div class="viewer-section">
-                <div class="viewer-header">
-                    <div class="viewer-info">
-                        <span class="viewer-id">ID: <strong id="viewerId">Loading...</strong></span>
-                        <span class="viewer-type">Type: <strong id="viewerType">-</strong></span>
-                        <span class="viewer-expires">Expires: <strong id="viewerExpires">-</strong></span>
-                    </div>
-                    <div class="viewer-actions">
-                        <button class="btn-secondary" id="downloadBtn" type="button">⬇️ Download</button>
-                        <button class="btn-secondary" id="copyContentBtn" type="button">📋 Copy</button>
-                        <button class="btn-secondary" id="rawBtn" type="button">🔗 Raw</button>
-                    </div>
+    <div class="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <i class="bi bi-file-text"></i>
+                    <span>SaveText</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>New</span>
+                    </a>
+                    <a href="https://github.com/save-text/save-text.github.io" target="_blank" rel="noopener" class="nav-link">
+                        <i class="bi bi-github"></i>
+                    </a>
                 </div>
+            </div>
+        </nav>
 
-                <div class="viewer-content" id="viewerContent">
-                    <div class="loader">Loading...</div>
-                </div>
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <section class="viewer-card">
+                    <!-- Viewer Header -->
+                    <div class="viewer-header">
+                        <div class="viewer-meta">
+                            <div class="meta-item">
+                                <i class="bi bi-hash"></i>
+                                <span id="viewerId">------</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="bi bi-file-earmark-code"></i>
+                                <span id="viewerType">---</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="bi bi-clock"></i>
+                                <span id="viewerExpires">---</span>
+                            </div>
+                        </div>
+                        <div class="viewer-actions">
+                            <button class="btn btn-icon" id="copyContentBtn" type="button" title="Copy content">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <button class="btn btn-icon" id="downloadBtn" type="button" title="Download">
+                                <i class="bi bi-download"></i>
+                            </button>
+                            <button class="btn btn-icon" id="rawBtn" type="button" title="View raw">
+                                <i class="bi bi-code"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Viewer Content -->
+                    <div class="viewer-content" id="viewerContent">
+                        <div class="loader">
+                            <i class="bi bi-arrow-repeat spin"></i>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
 
-        <footer>
-            <p><a href="/">← Create New Save</a></p>
+        <!-- Footer -->
+        <footer class="footer footer-minimal">
+            <div class="footer-container">
+                <div class="footer-bottom">
+                    <p>
+                        <a href="/">SaveText</a> &middot; 
+                        <a href="/about.html">About</a> &middot; 
+                        <a href="/privacy.html">Privacy</a> &middot; 
+                        <a href="/terms.html">Terms</a>
+                    </p>
+                </div>
+            </div>
         </footer>
     </div>
 
